@@ -1,0 +1,20 @@
+.hide
+{
+	display:none;
+}
+
+thead th {
+	text-align:center;
+	vertical-align: middle;
+	font-family:"Tahoma",Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	font-weight: bold;
+	padding: 8px 4px;
+	border:solid 1px #000;
+	border-top-style:double;
+}
+
+table.table-no-border tbody td, table.table-no-border tbody td:last-child
+{
+	border:none;
+}

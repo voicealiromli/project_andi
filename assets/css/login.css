@@ -1,0 +1,178 @@
+html, body.container, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp, small, strong, sub, sup, var, b, i, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, figcaption, figure, footer, header, hgroup, menu, nav, section, summary, time, mark, audio, video {
+    background: none repeat scroll 0 0 transparent;
+    border: 0 none;
+    font-size: 100%;
+    margin: 0;
+    outline: 0 none;
+    padding: 0;
+    vertical-align: baseline;
+}
+body {
+	background-image: url(../img/background.png);
+    line-height: 1;
+}
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+    display: block;
+}
+nav ul {
+    list-style: none outside none;
+}
+blockquote, q {
+    quotes: none;
+}
+blockquote:before, blockquote:after, q:before, q:after {
+    content: none;
+}
+a {
+    background: none repeat scroll 0 0 transparent;
+    font-size: 100%;
+    margin: 0;
+    padding: 0;
+    vertical-align: baseline;
+}
+ins {
+    background-color: #FFFF99;
+    color: #000000;
+    text-decoration: none;
+}
+mark {
+    background-color: #FFFF99;
+    color: #000000;
+    font-style: italic;
+    font-weight: bold;
+}
+del {
+    text-decoration: line-through;
+}
+abbr[title], dfn[title] {
+    border-bottom: 1px dotted;
+    cursor: help;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+hr {
+    -moz-border-bottom-colors: none;
+    -moz-border-image: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    border-color: #ccc -moz-use-text-color -moz-use-text-color;
+    border-right: 0 none;
+    border-style: solid none none;
+    border-width: 1px 0 0;
+    display: block;
+    height: 1px;
+    margin: 1em 0;
+    padding: 0;
+}
+input, select {
+    vertical-align: middle;
+}
+body {
+    font-family: Arial,Helvetica,sans-serif;
+    font-size: 10px;
+    padding: 0;
+		margin:0;
+}
+.container {
+	max-width:310px;
+	margin:0 auto;
+	margin-top:100px;
+	padding:10px;
+	border:3px solid #d0d0d0;
+	background: #fff;
+}
+header {
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+legend {
+    color: #333333;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 20px auto;
+    text-align: center;
+}
+label {
+    display: block;
+    margin-bottom: 2px;
+}
+input {
+    display: block;
+    margin-bottom: 10px;
+}
+input[type="text"], input[type="password"] {
+    border: 1px solid #ccc;
+    box-shadow: 0 0 5px #eee inset;
+    font-size: 14px;
+    min-width: 300px;
+    padding: 6px 4px;
+}
+input[type="submit"] {
+    cursor: pointer;
+    margin-top: 15px;
+    padding: 4px 8px;
+	float:right;
+	margin-bottom:20px;
+}
+input[type="submit"] {
+	-moz-box-shadow:inset 0px -10px 4px -9px #622b89;
+	-webkit-box-shadow:inset 0px -10px 4px -9px #622b89;
+	box-shadow:inset 0px -10px 4px -9px #622b89;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #622b89), color-stop(1, #a20dbd) );
+	background:-moz-linear-gradient( center top, #622b89 5%, #a20dbd 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#622b89', endColorstr='#a20dbd');
+	background-color:#622b89;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #a511c0;
+	display:inline-block;
+	color:#ffffff;
+	font-family:arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:1px 2px 0px #9b14b3;
+}input[type="submit"]:hover {
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #a20dbd), color-stop(1, #622b89) );
+	background:-moz-linear-gradient( center top, #a20dbd 5%, #622b89 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#a20dbd', endColorstr='#622b89');
+	background-color:#a20dbd;
+}input[type="submit"]:active {
+	position:relative;
+	top:1px;
+}
+.success, .warning {
+    margin-bottom: 5px;
+}
+.success {
+    color: #006600;
+}
+.warning {
+    color: #FF0000;
+}
+.require {
+    font-size: 10px;
+    padding: 10px 5px 5px;
+    text-align: center;
+}
+.require h5 {
+    margin-bottom: 5px;
+}
+footer {
+    text-align: center;
+}
+footer small {
+    color: #BBBBBB;
+    font-size: 10px;
+}
+.clear {
+    clear: both;
+    float: none;
+    line-height: 1.4px;
+}

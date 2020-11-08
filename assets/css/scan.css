@@ -1,0 +1,81 @@
+body
+{
+    padding-top:10px;
+	margin:0;
+}
+/* Hide this */
+#divMsg, #emessage {
+	/*display:none;*/
+}
+
+.btn-toolbar {
+}
+
+.btn-toolbar .btn-group {
+}
+
+.btn-toolbar .input-mini {
+	margin-top:-10px;
+}
+
+.btn-toolbar .input-btn {
+	width:60px;
+	padding:5px 2px;
+}
+
+.btn-toolbar .input-btn2 {
+	padding:6px 4px;
+}
+
+.clear {
+	clear:both; float:none; display:block;
+}
+
+.well {
+	padding:10px;margin-bottom:0;margin-bottom:10px;
+}
+
+.page-header {
+	margin:0; margin-bottom:10px; padding:0;
+}
+
+th.center, td.center { text-align: center; }
+
+.divcontrol
+{
+    width:580px; height:600px; border:dashed 4px #666;
+}
+
+.divcontrolthumbnail
+{
+    width:90px; height:560px;
+}
+div#dwtcontrolContainer  
+{
+    margin:0px; margin-left:22px; float:left; padding:0px; padding-top:10px; width:600px; height:800px;
+}
+
+div.dwtcontrolThumbnail
+{
+    padding:5px; padding-top:10px; text-align:center; border-collapse:collapse;border:3px solid #cE5E04; position: absolute; height: 580px; 
+	z-index: 1; background-color: #f0f0f0; width:100px;
+}
+
+@media (min-width: 980px) {
+}
+
+@media (max-width: 480px) {
+}
+
+@media (max-width: 768px) {
+}
+
+@media (max-width: 480px) and (max-width: 768px) {
+
+}
+
+@media (mix-width: 480px) {
+}
+
+@media (min-width: 768px) and (max-width: 980px) {
+}
