@@ -236,10 +236,89 @@ class Doc extends CI_Controller {
 		$this->model_session->auth_page('document', 2);
 		$this->model_session->log_activity('V', current_url());
 		$data['layout'] = $this->folder.'a';
+		$data['jenis_berkas'] = $this->db->query("select * from jenis_berkas")->result_array();
 		$this->load->view('body', $data);
 	}
+	
+	public function insertDokumen()
+	{
+	
+		$data = json_decode(json_encode($_POST));
+		$data = json_decode(json_encode($data), true)['data'];
+		$data = json_decode($data, TRUE);
+		$jenis_berkas = $data['berkas']['jenis_berkas'];
+		$no_polis 	  = $data['berkas']['no_polis'];
+		$nama_dokumen = $data['berkas']['nama_dokumen'];
+		$tahun        = $data['berkas']['tahun'];
+		$ctr		  = $data['berkas']['category'];
+		
+		$datax = array(
+			'ctr'=> $ctr, // jenis dokumen
+			'no'=> $no_polis, // No Polis
+			'klien'=>$nama_dokumen, // klien
+			'cyear'=>$tahun, // thn
+			'cdt'=>date('d-m-Y'),				// created_at
+			
+		);
+	
+		$this->db->insert('nasabah',$datax);	
+		$insertID = $this->db->insert_id();
+		
+		$ar_row = array();
+		
+		foreach($data['data_header_row'] as $row)
+		{
+			$folder = array(
+				 'id_nasabah' =>$insertID,
+				 'nama_folder' =>$row['nama_folder'],
+				 'blok' =>$row['blok'],
+				 'box' =>$row['box'],
+				 'rak' =>$row['rak'],
+			);
+			$this->db->insert('folder',$folder);
+			$insertIDx = $this->db->insert_id();
+			array_push($ar_row,array('id_folder'=>$insertIDx,'nama_folder'=>$row['nama_folder']));	
+		}
+		
+		foreach($ar_row as $row)
+		{
+			for($i=0;$i<count($_FILES['files']['name'][$row['nama_folder']]);$i++)
+			{
+				  
+				  //$n = $_FILES['files']['name'][$row['nama_folder']];
+				  $_FILES['file']['name'] = $_FILES['files']['name'][$row['nama_folder']][$i];
+				  $_FILES['file']['type'] = $_FILES['files']['type'][$row['nama_folder']][$i];
+				  $_FILES['file']['tmp_name'] = $_FILES['files']['tmp_name'][$row['nama_folder']][$i];
+				  $_FILES['file']['error'] = $_FILES['files']['error'][$row['nama_folder']][$i];
+				  $_FILES['file']['size'] = $_FILES['files']['size'][$row['nama_folder']][$i];
+				  
+				  $config['upload_path'] = 'uploads/'; 
+				  $config['allowed_types'] = 'jpg|jpeg|png|gif|pdf';
+				  $config['max_size'] = '5000';
+				  $config['file_name'] = $_FILES['files']['name'][$row['nama_folder']][$i];
+				  $config['remove_spaces'] 	= TRUE;
+				  $config['encrypt_name']	= TRUE;
+				  $this->load->library('upload',$config); 
+    			  if($this->upload->do_upload('file')){
+					  
+					 $uploadData = $this->upload->data();
+					 //$filename = $uploadData['file_name'];
+				 	 $file = array(
+							'nama_dokumen' =>$_FILES['files']['name'][$row['nama_folder']][$i],
+							'nama_file' =>$uploadData['raw_name'],
+							'id_folder' =>$row['id_folder'], 
+					 );
+					 $this->db->insert('dokumen_file',$file);
+				  }
+			 	//$this->upload_baru($row['id_folder']);
+			}	
+			
+		}	
+		
+	}
+	
 
-  public function i()
+    public function i()
 	{
 		$this->model_session->auth_page('document', 2);
 		$this->model_session->log_activity('A', current_url());

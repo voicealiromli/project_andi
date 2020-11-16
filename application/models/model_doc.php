@@ -638,9 +638,12 @@ class Model_doc extends CI_Model {
 						'klien'=>$this->input->post('name'), // klien
 						'cyear'=>$this->input->post('thn'), // thn
 						'cdt'=>date('d-m-Y'),				// created_at
-						'lemari'=>$this->input->post('sap'), // isian ga ada
-						'laci'=>$this->input->post('od'),	// isian ga ada
-						'box'=>$this->input->post('ab'),   // isian ga ada 
+						// 'lemari'=>$this->input->post('sap'), // isian ga ada
+						// 'laci'=>$this->input->post('od'),	// isian ga ada
+						// 'box'=>$this->input->post('ab'),   // isian ga ada 
+						//'lemari'=>'0', // isian ga ada
+						//'laci'=>'0',	// isian ga ada
+						//'box'=>'0',   // isian ga ada 
 					);
 	
 		$this->db->insert('nasabah',$data);	

@@ -6,7 +6,9 @@
 
 		<script type="text/javascript" src="<?php echo base_url('assets/js/bootstrap-datepicker.js')?>"></script>
     <script type="text/javascript" src="<?php echo base_url('assets/js/plugin.js')?>"></script>
-
+    <script>
+    	var base_url = "<?php echo  base_url(); ?>";
+	</script>
   </body>
 
 </html>
