@@ -312,8 +312,15 @@ class Doc extends CI_Controller {
 				  }
 			 	//$this->upload_baru($row['id_folder']);
 			}	
-			
 		}	
+		
+		$data = array(
+					"success" => 'OK',
+					"msg"     => 'Data baru telah terentry, <a href="'.site_url('doc/dk/'.$insertID.'').'">Untuk detailnya klik disini</a>'
+				);
+		echo json_encode($data);
+		//$this->session->set_flashdata('success', 'Data baru telah terentry, <a href="'.site_url('doc/dk/'.$insertID.'').'">Untuk detailnya klik disini</a>');
+        //redirect(site_url('doc/a'));	
 		
 	}
 	

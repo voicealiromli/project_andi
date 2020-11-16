@@ -48,7 +48,7 @@
 	<input type="hidden" name="category" id="category" value="02">
 	<div class="clearfix">&nbsp;</div>
 	<legend>Alamat Penyimpanan Dan File</legend>
-</form>
+
 <a href="#" id="tambah-data" class="btn btn-mini" title="Tambah">Tambah Folder</a>
 <table class="table tablesorter" id="myTable" style="width:50%;"> 
 	<thead>
@@ -87,8 +87,11 @@
 	</tbody>
 </table>
 <div class="form-actions">
+   <input type="reset" class="btn btn-default  btn-large" id="reset" value="Reset" />
    <input type="button" class="btn btn-primary btn-large" id="save" value="Save" />
+   
 </div>
+</form>
 <style>
 
 	.rw-t {
@@ -102,7 +105,14 @@
 <script>
 $(document).ready(function () {
 	
-	//$("#myTable").tablesorter(); 
+	$('body').on('click','#reset',function(){
+		
+		  $(this).closest('form').find("input[type=text], textarea").val("");
+		  $(this).closest('form').find("input[type=file], textarea").val("");
+		  //location.reload(); rw-w rw-t
+		  $('body').find('#myTable').find('.rw-w').find('.rw-t').html('');
+		
+	});
 	
 	$('body').on('click','#tambah-data',function(){
 		var k = '<tr class="rw-hed">'+
@@ -129,43 +139,19 @@ $(document).ready(function () {
 	});
 	
 	$('body').on('click','#btn-lampiran',function(){
-		
-		//alert("s");
 	
 		 var tr = $(this).parent().parent().parent();
-		 //$(ks).insertAfter(tr);
-		 
-		 // k = '<table>'+
-				// '<tr>'+
-					// '<td>'+
-					
-					 // 'Adasdas adsasdasd adsasdasd  asdasdasdasdasdasdas'+
-					
-					// '</td>'+
-				// '</tr>'+
-			 // '</table>';
-		 
-		 //tr.next('.rw-w').css("display","block");
-		 //tr.next('.rw-w').find('td').append('LLLLL');
-	     //console.log(tr.next('.rw-w').find('td'));
 		 var k = '<tr><td></td><td>File</td><td><input type="file" class="input-xlarge" id="file" name="name"/></td><td><a class="btn btn-mini" id="btn-del-dok">Del</a></td></tr>';
-		 //$( k ).appendTo( tr.next('.rw-w').find('td').find('.rw-t') );
 		 tr.next('.rw-w').find('.rw-t').append(k);
-		 //tr.next('.rw-w').append(k)
-		 //console.log();
 	});
 	
 	$('body').on('click','#btn-del',function(){
 		$(this).parent().parent().parent().remove();
-		//$(this).parent().parent().parent().next('.rw-w').remove();
-		
-		
 	});
 	
 	$('body').on('click','#btn-del-dok',function(){
 		$(this).parent().parent().remove();
 	});
-	
 	
 	$('body').on('click','#save',function(){
 		//$('.page-loader').removeClass('hidden');
@@ -193,80 +179,47 @@ $(document).ready(function () {
 			var fd2 = new FormData();
 			$(this).next('tr').find('table').find('tr').each(function(idx){
 				var dat3 = new Object();
-				//dat3.
 				 d = $(this).find("#file")[0].files[0];
-				//ar_file.push(fi);
-				//console.log($(this).find("#file")[0].files[0]);
-				//dat.f = fi;
-				
-				fd.append('files['+nama_f+']['+idx+']',d);
-				//fd.append('files['+idx+']',d);
-				//fd.append('files['+index+']['+idx+']',d);
-				//fd.append('files[][]',d);
-				
-				
-				
-				
+				 fd.append('files['+nama_f+']['+idx+']',d);
 				
 			});
-			//fd.append('file',fd2);
-			//dat.f = ar_file;
 			dat2.push(dat);
 			
 			
 		});
 		
-		
-		
-		
-		
 		data.data_header_row = dat2;
-		//data.files = fd;
 		 
 		var dd = JSON.stringify(data);
 		fd.append('data',dd);
-		
-		//console.log(fd);
 		$.ajax({
                 url: base_url+"index.php/doc/insertDokumen",
                 type: 'POST',
                 cache: false,
-				
-                dataType: "json",
+			    dataType: "json",
                 contentType: false,
                 processData: false, 
                 data : fd,
-                ///headers: {
+                //headers: {
                 //    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 //},
                 success: function(resp) {
-                  //if(resp.responseCode === 200) {
-                    // Reload datatable
-                    // window.location.href = baseUrl+'/candidates';
-                    
-                    // Send success message
-					 /* $.smallBox({
-							height: 50,
-							title : "Success",
-							content : resp.responseMessage,
-							color : "#109618",
-							sound_file: "voice_on",
-							timeout: 3000
-							//icon : "fa fa-bell swing animated"
-						});
-					} else {
-						$.smallBox({
-							height: 50,
-							title : "Error",
-							content : resp.responseMessage,
-							color : "#dc3912",
-							sound_file: "smallbox",
-							timeout: 3000
-							//icon : "fa fa-bell swing animated"
-						});
-					} */
-                // Hide loder
-               // $('.page-loader').addClass('hidden');
+					  if(resp.success === "OK")
+					  {
+						  ms = '<div class="alert alert-succes">'+resp.msg+'</div>';
+						  $(ms).insertBefore(".breadcrumb");
+						  $('body').find("input[type=text], textarea").val("");
+						  $('body').find("input[type=file], textarea").val("");
+						  $('body').find('#myTable').find('.rw-w').find('.rw-t').html('');
+						  
+						  
+					  }
+					  else
+					  {
+						   ms = '<div class="alert alert-error">'+resp.msg+'</div>';
+						   $(ms).insertBefore(".breadcrumb");
+					  }		
+			     
             },
             error: function(xhr, ajaxOptions, thrownError) {
                /*  $.smallBox({
