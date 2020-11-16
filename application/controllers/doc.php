@@ -293,7 +293,7 @@ class Doc extends CI_Controller {
 				  $_FILES['file']['size'] = $_FILES['files']['size'][$row['nama_folder']][$i];
 				  
 				  $config['upload_path'] = 'uploads/'; 
-				  $config['allowed_types'] = 'jpg|jpeg|png|gif|pdf';
+				  $config['allowed_types'] = 'jpg|jpeg|png|gif|pdf|csv';
 				  $config['max_size'] = '5000';
 				  $config['file_name'] = $_FILES['files']['name'][$row['nama_folder']][$i];
 				  $config['remove_spaces'] 	= TRUE;
