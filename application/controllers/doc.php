@@ -243,7 +243,7 @@ class Doc extends CI_Controller {
 	public function insertDokumen()
 	{
 		
-		print_r($_FILES);
+		//print_r($_FILES);
 		
 		$data = json_decode(json_encode($_POST));
 		$data = json_decode(json_encode($data), true)['data'];
