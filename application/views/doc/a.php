@@ -11,7 +11,6 @@
 
 
 <form class="form-horizontal alt1", id="form1">
-
    <div class="control-group">
     <label class="control-label">Jenis Berkas </label>
     <div class="controls">
@@ -30,22 +29,22 @@
    <div class="control-group">
     <label class="control-label"><span class="important">No. Polis </span></label> 
     <div class="controls">
-    <input type="text" class="input-xlarge" id="no" name="no" placeholder="Isi Nomor"/>
+    <input type="text" class="input-xlarge" id="no" name="no" placeholder="Isi Nomor" value=""/>
     </div>
   </div>
   <div class="control-group">
     <label class="control-label"><span class="important">Nama Berkas</span></label>
     <div class="controls">
-		<input type="text" class="input-xlarge" id="name" name="name" placeholder="Nama Debitur" /> 
+		<input type="text" class="input-xlarge" id="name" name="name" placeholder="Nama" /> 
     </div>
   </div>
   <div class="control-group">
 	<label class="control-label">Tahun </label>
 	<div class="controls">
-		<input type="text" class="input-mini" id="thn" name="thn" placeholder="Tahun" />
+		<input type="text" class="input-mini" id="thn" name="thn" placeholder="Tahun"  />
 	</div>
   </div>
-	<input type="hidden" name="category" id="category" value="02">
+	<!--<input type="hidden" name="category" id="category" value="02">-->
 	<div class="clearfix">&nbsp;</div>
 	<legend>Alamat Penyimpanan Dan File</legend>
 
@@ -146,7 +145,9 @@ $(document).ready(function () {
 	});
 	
 	$('body').on('click','#btn-del',function(){
+		$(this).parent().parent().parent().next().remove();
 		$(this).parent().parent().parent().remove();
+		
 	});
 	
 	$('body').on('click','#btn-del-dok',function(){
@@ -233,19 +234,6 @@ $(document).ready(function () {
                // $('.page-loader').addClass('hidden');
             }
         });
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		
 	});
 	
