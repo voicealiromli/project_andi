@@ -416,7 +416,8 @@ class Doc extends CI_Controller {
 		
 	}	
 	
-	public function del_updateDokumen($iddok,$FILES,$row2,$i)
+	//public function del_updateDokumen($iddok,$_FILES,$row2,$i)
+	public function del_updateDokumen($iddok,$row2,$i)
 	{
 		$this->load->helper("file");
 		$id = $iddok;
@@ -425,10 +426,11 @@ class Doc extends CI_Controller {
 		$namafile = $row->nama_file;
 		$nama_dokumen = $row->nama_dokumen;
 		//$prev_file_path = site_url()."/uploads/".$namafile.".pdf";
-		$prev_file_path = "/uploads/".$namafile.".pdf";
+		$prev_file_path = "./uploads/".$namafile.".pdf";
 		if(unlink($prev_file_path))
 		{
 			
+				//echo "error1ww";
 				//$this->db->where('id_dokumen_file ', $id);
 				//$this->db->delete('dokumen_file');
 				//$data = array(
@@ -439,16 +441,16 @@ class Doc extends CI_Controller {
 				//echo json_encode( $data );
 				//return json_encode( $data );
 			
-				$FILES['file']['name'] = $FILES['files']['name'][$row2['nama_folder']][$i];
-				$FILES['file']['type'] = $FILES['files']['type'][$row2['nama_folder']][$i];
-				$FILES['file']['tmp_name'] = $FILES['files']['tmp_name'][$row2['nama_folder']][$i];
-				$FILES['file']['error'] = $FILES['files']['error'][$row2['nama_folder']][$i];
-				$FILES['file']['size'] = $FILES['files']['size'][$row2['nama_folder']][$i];
+				$_FILES['file']['name'] = $_FILES['files']['name'][$row2['nama_folder']][$i];
+				$_FILES['file']['type'] = $_FILES['files']['type'][$row2['nama_folder']][$i];
+				$_FILES['file']['tmp_name'] = $_FILES['files']['tmp_name'][$row2['nama_folder']][$i];
+				$_FILES['file']['error'] = $_FILES['files']['error'][$row2['nama_folder']][$i];
+				$_FILES['file']['size'] = $_FILES['files']['size'][$row2['nama_folder']][$i];
 				
 				$config['upload_path'] = 'uploads/'; 
 				$config['allowed_types'] = 'jpg|jpeg|png|gif|pdf|csv';
 				$config['max_size'] = '5000';
-				$config['file_name'] = $FILES['files']['name'][$row2['nama_folder']][$i];
+				$config['file_name'] = $_FILES['files']['name'][$row2['nama_folder']][$i];
 				$config['remove_spaces'] 	= TRUE;
 				$config['encrypt_name']	= TRUE;
 				
@@ -465,6 +467,10 @@ class Doc extends CI_Controller {
 					 $this->db->where('id_dokumen_file',$id);
 					 $this->db->update('dokumen_file',$file);
 				}
+				else
+				{
+					//echo "error1";
+				}	
 				
 		}	
 		else
@@ -474,7 +480,9 @@ class Doc extends CI_Controller {
 			//		"msg"     => 'Terjadi Kesalahan'
 			//	);
 			//header('Content-Type: application/json');
-			//echo json_encode( $data );	 
+			//echo json_encode( $data );	
+				
+			//echo "error2";	
 			
 		}
 		
@@ -541,16 +549,23 @@ class Doc extends CI_Controller {
 				$cn = 0;
 				foreach($row['id_dokumen'] as $r)
 				{
-					
+					//echo $r['id_dokumen_file']; echo "<br>";
 					if(in_array($r['id_dokumen_file'],$array_idf))
 					{
 						$row2['nama_folder'] = $row['nama_folder'];
 						$row2['id_folder']   = $row['id_folder'];
+						//$r['file'] = "no_update";
+						if($r['file'] == "update")
+						{
+							//print_r($_FILES['files']['name'][$row2['nama_folder']]);
+							if( $_FILES['files']['name'][$row2['nama_folder']][$cn] !== "undefined")
+							{	
+								//$this->del_updateDokumen($r['id_dokumen_file'],$_FILES,$row2,$cn);
+								$this->del_updateDokumen($r['id_dokumen_file'],$row2,$cn);
+							}
+						}	
 						
-						if( $_FILES['files']['name'][$row2['nama_folder']][$cn] !== "undefined")
-						{	
-							$this->del_updateDokumen($r['id_dokumen_file'],$_FILES,$row2,$cn);
-						}
+						
 					}
                     else
                     {
@@ -560,7 +575,7 @@ class Doc extends CI_Controller {
 							$row2['nama_folder'] = $row['nama_folder'];
 							$row2['id_folder']   = $row['id_folder'];
 							$_FILES['file']['name'] = $_FILES['files']['name'][$row2['nama_folder']][$cn];
-							$_FILES['file']['type'] = $_FILES['files']['type'][$row2['nama_folder']][$i];
+							$_FILES['file']['type'] = $_FILES['files']['type'][$row2['nama_folder']][$cn];
 							$_FILES['file']['tmp_name'] = $_FILES['files']['tmp_name'][$row2['nama_folder']][$cn];
 							$_FILES['file']['error'] = $_FILES['files']['error'][$row2['nama_folder']][$cn];
 							$_FILES['file']['size'] = $_FILES['files']['size'][$row2['nama_folder']][$cn];
@@ -641,7 +656,7 @@ class Doc extends CI_Controller {
 			}	
 		}
 		
-		$data = array(
+				$data = array(
 					"success" => 'OK',
 					"msg"     => 'Data Sudah terupdate'
 				);

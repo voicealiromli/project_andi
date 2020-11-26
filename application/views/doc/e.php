@@ -160,43 +160,56 @@ $(document).ready(function () {
 	$('body').on('click','#btn-del',function(){
 		var thiss = $(this);
 		
-		var result = confirm("Anda akan menhapus folder beserta semua isinya \n Apakah yakin ? ");
-		if (result) {
-			
-			var id = thiss.parent().parent().parent().find("#hid-id-folder").val();
+		var id = thiss.parent().parent().parent().find("#hid-id-folder").val();
 		
-			$.ajax({
-					type: "POST",
-					url: base_url+"index.php/doc/delFolder",
-					data: {data:id},
-					dataType: "json",  
-					cache:false,
-					success: function(resp) {
-						  console.log(resp.msg);
-						  if(resp.success === "OK")
-						  {
-							  //nama_file
-							  for(var i=0; i<resp.msg.length; i++)
-							  {
-								  ms = '<div class="alert alert-succes">Dokumen dokumen berhasil dihapus '+resp.msg[i]['nama_file']+'</div>';
-								  $(ms).insertBefore(".breadcrumb");
-							  }	  
-							  
-							  thiss.parent().parent().parent().next().remove();
-						      thiss.parent().parent().parent().remove();
-							  
-						  }
-						  else
-						  {
-							   ms = '<div class="alert alert-error">'+resp.msg+'</div>';
-							   $(ms).insertBefore(".breadcrumb");
-						  }		
-					 
-				},
-				error: function(xhr, ajaxOptions, thrownError) {
-				  
+		if(id===undefined)
+		{
+			
+				thiss.parent().parent().parent().next().remove();
+				thiss.parent().parent().parent().remove();
+			
+		}
+		else
+		{		
+		
+				var result = confirm("Anda akan menhapus folder beserta semua isinya \n Apakah yakin ? ");
+				if (result) {
+					
+					var id = thiss.parent().parent().parent().find("#hid-id-folder").val();
+				
+					$.ajax({
+							type: "POST",
+							url: base_url+"index.php/doc/delFolder",
+							data: {data:id},
+							dataType: "json",  
+							cache:false,
+							success: function(resp) {
+								  console.log(resp.msg);
+								  if(resp.success === "OK")
+								  {
+									  //nama_file
+									  for(var i=0; i<resp.msg.length; i++)
+									  {
+										  ms = '<div class="alert alert-succes">Dokumen dokumen berhasil dihapus '+resp.msg[i]['nama_file']+'</div>';
+										  $(ms).insertBefore(".breadcrumb");
+									  }	  
+									  
+									  thiss.parent().parent().parent().next().remove();
+									  thiss.parent().parent().parent().remove();
+									  
+								  }
+								  else
+								  {
+									   ms = '<div class="alert alert-error">'+resp.msg+'</div>';
+									   $(ms).insertBefore(".breadcrumb");
+								  }		
+							 
+						},
+						error: function(xhr, ajaxOptions, thrownError) {
+						  
+						}
+					});
 				}
-			});
 		}
 		
 		
@@ -207,36 +220,45 @@ $(document).ready(function () {
 		
 		var thiss = $(this).parent().parent();
 		
-		var result = confirm("Anda akan menhapus dokumen "+thiss.find('b').text()+" ?");
-		if (result) {
-			
-			var id = $(this).parent().parent().find("#id_dokumen_file").val();
+		if($(this).parent().parent().find("#id_dokumen_file").val()===undefined)
+		{
+			thiss.remove();
+		}
+		else
+        {			
 		
-			$.ajax({
-					type: "POST",
-					url: base_url+"index.php/doc/delDokumen",
-					data: {data:id},
-					dataType: "json",  
-					cache:false,
-					success: function(resp) {
-						  if(resp.success === "OK")
-						  {
-							  ms = '<div class="alert alert-succes">'+resp.msg+'</div>';
-							  $(ms).insertBefore(".breadcrumb");
-							  //location.reload();
-							  thiss.remove();
-						  }
-						  else
-						  {
-							   ms = '<div class="alert alert-error">'+resp.msg+'</div>';
-							   $(ms).insertBefore(".breadcrumb");
-						  }		
-					 
-				},
-				error: function(xhr, ajaxOptions, thrownError) {
-				  
-				}
-			});
+			var result = confirm("Anda akan menhapus dokumen "+thiss.find('b').text()+" ?");
+			if (result) {
+				
+				var id = $(this).parent().parent().find("#id_dokumen_file").val();
+			
+				$.ajax({
+						type: "POST",
+						url: base_url+"index.php/doc/delDokumen",
+						data: {data:id},
+						dataType: "json",  
+						cache:false,
+						success: function(resp) {
+							  if(resp.success === "OK")
+							  {
+								  ms = '<div class="alert alert-succes">'+resp.msg+'</div>';
+								  $(ms).insertBefore(".breadcrumb");
+								  //location.reload();
+								  thiss.remove();
+							  }
+							  else
+							  {
+								   ms = '<div class="alert alert-error">'+resp.msg+'</div>';
+								   $(ms).insertBefore(".breadcrumb");
+							  }		
+						 
+					},
+					error: function(xhr, ajaxOptions, thrownError) {
+					  
+					}
+				});
+			}
+		
 		}
 		
 	});
@@ -247,15 +269,13 @@ $(document).ready(function () {
 	});
 	
 	$('body').on('change','input[type=file]',function(event){
-		//var tmppath = URL.createObjectURL(event.target.files[0]);
-		//var tmppath = event.target.files[0];//URL.createObjectURL(event.target.files[0]);
-		//$("img").fadeIn("fast").attr('src',tmppath);
-		//alert(tmppath);  src
-		//console.log(tmppath); 
-		//console.log(tmppath);
-		//$(this).parent().parent().find('#view-dok-hid').val(tmppath);
-	    //append("OK");
-		//$('body').find('.myModal').find('.modal-body').find('embed').attr('src',tmppath);  //append("OK");
+		var val = $(this).val().toLowerCase(),
+            //regex = new RegExp("(.*?)\.(docx|doc|pdf|xml|bmp|ppt|xls)$");
+            regex = new RegExp("(.*?)\.(pdf)$");
+        if (!(regex.test(val))) {
+            $(this).val('');
+            alert('Hanya boleh pdf format');
+        }
 	});	
 	
 	$('body').on('click','#save',function(){
@@ -277,17 +297,47 @@ $(document).ready(function () {
 			var dat = new Object();
 			var nama_f = $(this).find("#folder_name").val(); 
 			dat.nama_folder =  $(this).find("#folder_name").val(); 
-			dat.id_folder =  $(this).find("#hid-id-folder").val(); 
+			dat.id_folder =  ($(this).find("#hid-id-folder").val() ==undefined ) ? "undefined" : $(this).find("#hid-id-folder").val(); 
 			dat.box  =  $(this).find("#box").val(); 
 			dat.rak  =  $(this).find("#rak").val(); 
 			dat.blok =  $(this).find("#blok").val(); 
-			var fd2 = new FormData();
+			//var fd2 = new FormData();
 			var dat21 = [];
+			//var dat4 = new Array();
 			$(this).next('tr').find('table').find('tr').each(function(idx){
 				 var dat3 = new Object();
-				 dat3.id_dokumen_file =  $(this).find("#id_dokumen_file").val(); 
+				 //dat3.id_dokumen_file =  $(this).find("#id_dokumen_file").val(); 
 				 d  = $(this).find("#file")[0].files[0]; 
-				 fd.append('files['+nama_f+']['+idx+']',d);
+				 d2  = $(this).find("#file")[0].files[0]; 
+				 
+				 if(d!==undefined && $(this).find("#id_dokumen_file").val()==undefined )
+				 {
+				 	 d=$(this).find("#file")[0].files[0]; 
+					 dat3.id_dokumen_file = "undefined"; //id_dokumen_file
+					 dat3.file = d; // ketika ada penambahan tidak kosong
+				 }	
+				 
+				 else if(d===undefined && $(this).find("#id_dokumen_file").val()==undefined )
+				 {
+				 	 d="undefined";
+					 dat3.id_dokumen_file = "undefined"; //id_dokumen_file
+					 dat3.file = d; // ketika ada penambahan  kosong
+				 }	
+
+                 else if(d===undefined && $(this).find("#id_dokumen_file").val()!="" )
+				 {
+					 d="no_update";
+					 dat3.id_dokumen_file = $(this).find("#id_dokumen_file").val();
+					 dat3.file = d; // tidak diupdate
+				 }
+                 else if(d!==undefined && $(this).find("#id_dokumen_file").val()!="" )
+				 {
+					 d="update";
+					 dat3.file = d; // diupdate
+					 dat3.id_dokumen_file =  $(this).find("#id_dokumen_file").val();
+				 }		
+               				 
+				 fd.append('files['+nama_f+']['+idx+']',d2);
 				 dat21.push(dat3);
 			});
 			dat.id_dokumen = dat21; 
@@ -296,36 +346,118 @@ $(document).ready(function () {
 		data.data_header_row = dat2;
 		var dd = JSON.stringify(data);
 		fd.append('data',dd);
-		$.ajax({
-                url: base_url+"index.php/doc/updateDokumen",
-                type: 'POST',
-                cache: false,
-			    dataType: "json",
-                contentType: false,
-                processData: false, 
-                data : fd,
-                success: function(resp) {
-					  if(resp.success === "OK")
-					  {
-						  ms = '<div class="alert alert-succes">'+resp.msg+'</div>';
-						  $(ms).insertBefore(".breadcrumb");
-						  $('body').find("input[type=text], textarea").val("");
-						  $('body').find("input[type=file], textarea").val("");
-						  $('body').find('#myTable').find('.rw-w').find('.rw-t').html('');
-					  }
-					  else
-					  {
-						   ms = '<div class="alert alert-error">'+resp.msg+'</div>';
-						   $(ms).insertBefore(".breadcrumb");
-					  }		
-			     
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-              
-            }
-        });
+		//
+		if(data.berkas.jenis_berkas=="")
+		{
+			alert("Jenis Berkas Kosong");
+		}
+		else if(data.berkas.no_polis == "")
+		{
+			alert("Nomor polis kosong");
+		}	
+		else if(data.berkas.nama_dokumen == "")
+		{
+			alert("Nama dokumen kosong");
+		}	
+		else if(data.berkas.tahun == "")
+		{
+			alert("Tahun kosong");
+		}
+        else
+		{
+			var cek = true;
+			for(var i=0; i<data.data_header_row.length; i++)
+			{
+				var b = i+1;
+				if(data.data_header_row[i]['nama_folder']=="")
+				{
+					alert("Nama Folder Kosong pada baris folder ke "+ b);
+				    cek = false;
+				}
+				else if(data.data_header_row[i]['box']=="")	
+				{
+					alert("Box Kosong pada baris folder ke "+ b);
+					cek = false;
+				}	
+				else if(data.data_header_row[i]['rak']=="")	
+				{
+					alert("Rak Kosong pada baris folder ke "+ b);
+					cek = false;
+				}
+				else if(data.data_header_row[i]['blok']=="")	
+				{
+					alert("Blok Kosong pada baris folder ke "+ b);
+					cek = false;
+				}
+				else
+				{
+					
+					//console.log(data.data_header_row[i]['id_dokumen']);
+					if(data.data_header_row[i]['id_dokumen'].length == 0 )
+					{
+						alert("File dokumen pada folder '"+data.data_header_row[i]['nama_folder'] +"' masih kosong");
+						cek = false;
+					}
+                    else
+                    {
+						for(var j=0; j<data.data_header_row[i]['id_dokumen'].length; j++)
+						{
+							if(data.data_header_row[i]['id_dokumen'][j]['file']=="undefined")
+							{
+								alert("Ada File dokumen pada folder '"+data.data_header_row[i]['nama_folder'] +"' belum diisi !!");
+								cek = false;
+							}
+							
+						}	
+					    	
+					} 	
+				}	
+			}
+		}	
+		
+		if(cek==true)
+		{
+			saving(fd); 
+			//alert("ngesave");
+		}	
+		
 	});
 });	
+
+function saving(fd)
+{
+	$.ajax({
+			url: base_url+"index.php/doc/updateDokumen",
+			type: 'POST',
+			cache: false,
+			dataType: "json",
+			contentType: false,
+			processData: false, 
+			data : fd,
+			success: function(resp) {
+				  if(resp.success === "OK")
+				  {
+					  //ms = '<div class="alert alert-succes">'+resp.msg+'</div>';
+					  //$(ms).insertBefore(".breadcrumb");
+					  alert("Data dokumen sudah diupdate");
+					  location.reload();
+					  //$('body').find("input[type=text], textarea").val("");
+					  //$('body').find("input[type=file], textarea").val("");
+					  //$('body').find('#myTable').find('.rw-w').find('.rw-t').html('');
+				  }
+				  else
+				  {
+					   ms = '<div class="alert alert-error">'+resp.msg+'</div>';
+					   $(ms).insertBefore(".breadcrumb");
+				  }		
+			 
+			},
+			error: function(xhr, ajaxOptions, thrownError) {
+			  
+			}
+	});
+}
+
 function loadData(id)
 {
 	$.ajax({

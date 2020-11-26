@@ -154,6 +154,20 @@ $(document).ready(function () {
 		$(this).parent().parent().remove();
 	});
 	
+	$('body').on('change','input[type=file]',function(event){
+		
+		var val = $(this).val().toLowerCase(),
+            //regex = new RegExp("(.*?)\.(docx|doc|pdf|xml|bmp|ppt|xls)$");
+            regex = new RegExp("(.*?)\.(pdf)$");
+
+        if (!(regex.test(val))) {
+            $(this).val('');
+            alert('Hanya boleh pdf format');
+        }
+		
+	});	
+	
+	
 	$('body').on('click','#save',function(){
 		//$('.page-loader').removeClass('hidden');
 		var data = new Object();
@@ -162,7 +176,7 @@ $(document).ready(function () {
 		data_berkas.no_polis =  $('#no').val();
 		data_berkas.nama_dokumen = $('#name').val();
 		data_berkas.tahun= $('#thn').val();
-		data_berkas.category = $('#category').val();
+		//data_berkas.category = $('#category').val();
 		data.berkas = data_berkas;
 		
 		var fd = new FormData();
@@ -177,13 +191,23 @@ $(document).ready(function () {
 			dat.rak  =  $(this).find("#rak").val(); 
 			dat.blok =  $(this).find("#blok").val(); 
 			
-			var fd2 = new FormData();
+			//var fd2 = new FormData();
+			var dat4 = new Array();
 			$(this).next('tr').find('table').find('tr').each(function(idx){
 				var dat3 = new Object();
 				 d = $(this).find("#file")[0].files[0];
+				 //console.log(d);
+				 
+				 if(d===undefined)
+				 {
+					 d="undefined";
+				 }	 
+				 dat3.file = d;
+				 dat4.push(dat3);
 				 fd.append('files['+nama_f+']['+idx+']',d);
 				
 			});
+			dat.data_file = dat4;
 			dat2.push(dat);
 			
 			
@@ -193,50 +217,143 @@ $(document).ready(function () {
 		 
 		var dd = JSON.stringify(data);
 		fd.append('data',dd);
-		$.ajax({
-                url: base_url+"index.php/doc/insertDokumen",
-                type: 'POST',
-                cache: false,
-			    dataType: "json",
-                contentType: false,
-                processData: false, 
-                data : fd,
-                //headers: {
-                //    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                //},
-                success: function(resp) {
-					  if(resp.success === "OK")
-					  {
-						  ms = '<div class="alert alert-succes">'+resp.msg+'</div>';
-						  $(ms).insertBefore(".breadcrumb");
-						  $('body').find("input[type=text], textarea").val("");
-						  $('body').find("input[type=file], textarea").val("");
-						  $('body').find('#myTable').find('.rw-w').find('.rw-t').html('');
-						  
-						  
-					  }
-					  else
-					  {
-						   ms = '<div class="alert alert-error">'+resp.msg+'</div>';
-						   $(ms).insertBefore(".breadcrumb");
-					  }		
-			     
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-               /*  $.smallBox({
-                    title : "Error",
-                    content : xhr.statusText,
-                    color : "#dc3912",
-                    timeout: 3000
-                    //icon : "fa fa-bell swing animated"
-                }); */
-                // Hide loder
-               // $('.page-loader').addClass('hidden');
-            }
-        });
 		
+		//console.log(data.data_header_row);
+		if(data.berkas.jenis_berkas=="")
+		{
+			alert("Jenis Berkas Kosong");
+		}
+		else if(data.berkas.no_polis == "")
+		{
+			alert("Nomor polis kosong");
+		}	
+		else if(data.berkas.nama_dokumen == "")
+		{
+			alert("Nama dokumen kosong");
+		}	
+		else if(data.berkas.tahun == "")
+		{
+			alert("Tahun kosong");
+		}
+        else
+        {
+			var cek = true;
+			for(var i=0; i<data.data_header_row.length; i++)
+			{
+			
+				var b = i+1;
+				if(data.data_header_row[i]['nama_folder']=="")
+				{
+					alert("Nama Folder Kosong pada baris folder ke "+ b);
+				    cek = false;
+				}
+				else if(data.data_header_row[i]['box']=="")	
+				{
+					alert("Box Kosong pada baris folder ke "+ b);
+					cek = false;
+				}	
+				else if(data.data_header_row[i]['rak']=="")	
+				{
+					alert("Rak Kosong pada baris folder ke "+ b);
+					cek = false;
+				}
+				else if(data.data_header_row[i]['blok']=="")	
+				{
+					alert("Blok Kosong pada baris folder ke "+ b);
+					cek = false;
+				}
+				else
+				{
+					
+					if(data.data_header_row[i]['data_file'].length == 0 )
+					{
+						alert("File dokumen pada folder '"+data.data_header_row[i]['nama_folder'] +"' masih kosong");
+						cek = false;
+					}
+                    else
+                    {
+						//console.log(data.data_header_row[i]['data_file']);
+						for(var j=0; j<data.data_header_row[i]['data_file'].length; j++)
+						{
+							//console.log(data.data_header_row[i]['data_file'][j]['file']);
+							if(data.data_header_row[i]['data_file'][j]['file']=="undefined")
+							{
+								alert("Ada File dokumen pada folder '"+data.data_header_row[i]['nama_folder'] +"' belum diisi !!");
+								cek = false;
+							}
+							
+						}	
+					    	
+					} 	
+					
+				}	
+			
+			}	
+			
+		}			
+		
+		if(cek==true)
+		{
+			saving(fd); 
+		}	
 	});
 	
 });	
+
+function saving(fd)
+{
+	$.ajax({
+			url: base_url+"index.php/doc/insertDokumen",
+			type: 'POST',
+			cache: false,
+			dataType: "json",
+			contentType: false,
+			processData: false, 
+			data : fd,
+			//headers: {
+			//    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+			//},
+			success: function(resp) {
+				  if(resp.success === "OK")
+				  {
+					  ms = '<div class="alert alert-succes">'+resp.msg+'</div>';
+					  $(ms).insertBefore(".breadcrumb");
+					  $('body').find("input[type=text], textarea").val("");
+					  $('body').find("input[type=file], textarea").val("");
+					  $('body').find('#myTable').find('tbody').html('');
+					  
+					  
+					  var k = '<tr class="rw-hed">'+
+						 '<td>'+
+							'<div style="width:130px;">'+
+								'<a class="btn btn-mini" id="btn-lampiran">Add File</a> &nbsp;'+
+							'</div>'+
+						'</td>'+
+						'<td><input type="text" class="form-control" id="folder_name" placeholder="Nama Folder" style="width:150px;"></td>'+
+						'<td><input type="text" class="form-control" id="box" placeholder="BOX" style="width:150px;"></td>'+
+						'<td><input type="text" class="form-control" id="blok" placeholder="BLOK" style="width:100px;"></td>'+
+						'<td><input type="text" class="form-control" id="rak" placeholder="RAK" style="width:100px;"></td>'+
+						'</tr>'+
+						'<tr class="rw-w" style="">'+
+						   '<td colspan="5">'+
+								'<table class="rw-t" style="width:100%;">'+
+									
+								'</table>'
+							'</td>'+
+						'</tr>';
+					$('body').find('#myTable').find('.tb').append(k);
+				  }
+				  else
+				  {
+					   ms = '<div class="alert alert-error">'+resp.msg+'</div>';
+					   $(ms).insertBefore(".breadcrumb");
+				  }		
+			 
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+		  
+		}
+	});
+}
 
 </script>
