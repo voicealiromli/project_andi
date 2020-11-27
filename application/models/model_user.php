@@ -230,7 +230,8 @@ class Model_user extends CI_Model {
 							'userPwd'=>$password,
 							'userFlag'=>$this->input->post('status'),
 							'userAdmin'=>$this->input->post('su'),
-							'userDepartment'=>$this->input->post('dept'),
+							//'userDepartment'=>$this->input->post('dept'),
+							'userDepartment'=>0, //$this->input->post('dept'),
 							'group_id'=>$this->input->post('role'),
 							'userCdt'=>date('Y-m-d H:i:s'),
 							'userCby'=>$this->session->userdata('uID')
