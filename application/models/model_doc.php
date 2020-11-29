@@ -3,6 +3,9 @@
 class Model_doc extends CI_Model {
 	
 	var $datatable_json = array('id','no','title','cat_id','borw','cmpl','date','vcnt','ab','sap','od','fe','laci','hm','page','desc','flag');
+	var $datatable_json_folder = array('id_folder','id_nasabah','nama_folder','blok','rak','box');
+	var $datatable_json_doc = array('idn','no','klien','ctr','box','lemari','laci','cyear','cdt','cby');
+	var $datatable_json_file = array('id_dokumen_file','nama_dokumen','nama_file','id_folder');
 	var $table_cols;
 	var $table_json;
 	
@@ -693,6 +696,25 @@ class Model_doc extends CI_Model {
 		{
 			$this->load->model('model_atc');
 			$file = $this->model_atc->deleteAllAtc($id);
+			
+			/* add alay */
+			$fs = $this->db->query("select * from folder where id_nasabah='$id'")->result_array();
+			foreach($fs as $row)
+			{
+				$id_f = $row['id_folder'];
+				$fss = $this->db->query("select * from dokumen_file where id_folder='$id_f'")->result_array();
+				foreach($fss as $r)
+				{
+					//$this->db->where('idn', $id);
+					//$this->db->delete('nasabah');
+					unlink(realpath(DATA_VIEW.$r->nama_file.'.pdf'));
+				}
+				$this->db->where('id_folder', $id_f);
+			    $this->db->delete('dokumen_file');
+			}
+			/* end alay */
+			
+			
 			return TRUE;
 		}
 		else
@@ -801,6 +823,553 @@ class Model_doc extends CI_Model {
 	}
 	*/
 	
+	public function get_datatable_json_folder()
+	{		
+		$aColumns = $this->datatable_json_folder;
+		
+		$sIndexColumn = "id_folder";	
+		$sTable = 'folder';
+		$joinCols = null;//'group_title';
+		$joinQuery = '';//"LEFT JOIN ".DBGRP." ON ".DBGRP.".group_id = ".$sTable.".group_id";
+	
+		$sLimit = "";
+		if ( isset( $_GET['iDisplayStart'] ) && $_GET['iDisplayLength'] != '-1' )
+		{
+			$sLimit = "LIMIT ".(int)( $_GET['iDisplayStart'] ).", ".
+				(int)( $_GET['iDisplayLength'] );
+		}
+		
+		// ordering
+		$sOrder = "";
+		if ( isset( $_GET['iSortCol_0'] ) )
+		{
+			$sOrder = "ORDER BY  ";
+			for ( $i=0 ; $i<intval( $_GET['iSortingCols'] ) ; $i++ )
+			{
+				if ( $_GET[ 'bSortable_'.intval($_GET['iSortCol_'.$i]) ] == "true" )
+				{
+					$sOrder .= $aColumns[ intval( $_GET['iSortCol_'.$i] ) ]."
+						".$this->escapeString($_GET['sSortDir_'.$i] ) .", ";
+				}
+			}
+		  
+			$sOrder = substr_replace( $sOrder, "", -2 );
+			if ( $sOrder == "ORDER BY" )
+			{
+				$sOrder = "";
+			}
+		}
+		// echo "c=".$sOrder;exit;
+		$sWhere = "";
+		if ( isset($_GET['sSearch']) && $_GET['sSearch'] != "" )
+		{
+			$sWhere = "WHERE (";
+			for ( $i=0 ; $i<count($aColumns) ; $i++ )
+			{
+				if ( isset($_GET['bSearchable_'.$i]) && $_GET['bSearchable_'.$i] == "true" )
+				{
+					$sWhere .= "`".$aColumns[$i]."` LIKE '%".$this->db->escape_like_str( $_GET['sSearch'] )."%' OR ";
+				}
+			}
+			$sWhere = substr_replace( $sWhere, "", -3 );
+			$sWhere .= ')';
+		}
+		
+		/* Individual column filtering */
+		for ( $i=0 ; $i<count($aColumns) ; $i++ )
+		{
+			if ( isset($_GET['bSearchable_'.$i]) && $_GET['bSearchable_'.$i] == "true" && $_GET['sSearch_'.$i] != '' )
+			{
+				if ( $sWhere == "" )
+				{
+					$sWhere = "WHERE ";
+				}
+				else
+				{
+					$sWhere .= " AND ";
+				}
+				$sWhere .= "`".$aColumns[$i]."` LIKE '%".$this->db->escape_like_str($_GET['sSearch_'.$i])."%' ";
+			}
+		}
+		$sWhere .= "where id_nasabah = ".$_GET['idn']."";
+		// customize, added $joinQuery var name //`$joinCols`,
+		$sQuery = "
+			SELECT SQL_CALC_FOUND_ROWS  `".str_replace(" , ", " ", implode("`, `", $aColumns))."`
+			FROM   $sTable
+			$joinQuery
+			$sWhere
+			$sOrder
+			$sLimit
+			";
+		 		
+		$rResult = $this->db->query($sQuery);
+		$result = $rResult->result();//`$joinCols`,
+		$sQueryC = "
+			SELECT SQL_CALC_FOUND_ROWS  `".str_replace(" , ", " ", implode("`, `", $aColumns))."`
+			FROM   $sTable
+			$joinQuery
+			$sWhere
+			";
+			
+		
+		
+		
+		$rResultC = $this->db->query($sQueryC);
+		
+		$iFilteredTotal = 0;
+		if( $rResultC->num_rows() > 0) {
+			$iFilteredTotal = $rResultC->num_rows();
+		}
+		
+		$sQuery3 = "
+			SELECT COUNT(`".$sIndexColumn."`)
+			FROM   $sTable
+		";
+		
+		$rResultTotal = $this->db->query($sQuery3);
+		
+		$iTotal = 0;
+		if( $rResultTotal->num_rows() > 0) {
+			$iTotal = $rResultTotal->num_rows();
+		}
+		
+		if( !$this->input->get('sEcho') ) {
+			exit();
+		}
+		
+		// CSRF
+		$CI =& get_instance();
+		if($CI->config->item('csrf_protection') === TRUE)
+		{
+			$csrf_post = $this->input->get($CI->config->item('csrf_token_name'));
+			$csrf_cookie = $_COOKIE[$CI->config->item('csrf_cookie_name')];
+			if( !$csrf_post || $csrf_post!=$csrf_cookie ) {
+				return false;
+			}
+		}
+		
+		$output = array(
+			"sEcho" => intval($_GET['sEcho']),
+			"iTotalRecords" => $iTotal,
+			"iTotalDisplayRecords" => $iFilteredTotal,
+			"aaData" => array()
+		);
+		
+		
+		//print_r($result);
+		
+		foreach( $result as $aRow )
+		{
+			
+			
+			$row = array();
+			$button = '';
+			
+			$editUrl = site_url('user/e/'.$aRow->id_folder );
+			$arsip  = 'arsip';
+			$fol =  'folder';
+			//$deleteUrl = site_url('user/d/'.$aRow->id_folder );
+			$file = site_url('doc/file/'.$aRow->id_folder.'/'.$arsip.'/'.$fol);
+			
+			$button .= '<a class="btn btn-mini" id="open-edit" data="'.$aRow->id_folder.'"><i class="icon-pencil"></i> </a> ';
+		    $button .= '<a href="#" class="btn btn-mini btn-danger" id="deleteBtn" data="'.$aRow->id_folder.'" ><i class="icon-trash icon-white"></i> </a>';
+			$button .= '<a href="'.$file.'" class="btn btn-mini default" id="file-input">File </a>';
+			
+			// $row[] = $button;
+			$row[] = $aRow->id_folder;
+			$row[] = $aRow->nama_folder;
+			$row[] = $aRow->blok;
+			$row[] = $aRow->box;
+			$row[] = $aRow->rak;
+			//$row[] = ($aRow->userFlag)?'Aktif':'Non-Aktif';
+			//$row[] = $aRow->group_title;
+			$row[] = $button;
+			$output['aaData'][] = $row;
+		}
+		
+		echo json_encode( $output );
+		
+	}
+	function escapeString($val) {
+		$db = get_instance()->db->conn_id;
+		$val = mysqli_real_escape_string($db, $val);
+		return $val;
+	}
+	/* doc */
+	public function get_datatable_json_doc()
+	{		
+		$aColumns = $this->datatable_json_doc;
+		
+		$sIndexColumn = "idn";	
+		$sTable = 'nasabah';
+		$joinCols = null;//'group_title';
+		$joinQuery = '';//"LEFT JOIN ".DBGRP." ON ".DBGRP.".group_id = ".$sTable.".group_id";
+	
+		$sLimit = "";
+		if ( isset( $_GET['iDisplayStart'] ) && $_GET['iDisplayLength'] != '-1' )
+		{
+			$sLimit = "LIMIT ".(int)( $_GET['iDisplayStart'] ).", ".
+				(int)( $_GET['iDisplayLength'] );
+		}
+		
+		// ordering
+		$sOrder = "";
+		if ( isset( $_GET['iSortCol_0'] ) )
+		{
+			$sOrder = "ORDER BY  ";
+			for ( $i=0 ; $i<intval( $_GET['iSortingCols'] ) ; $i++ )
+			{
+				if ( $_GET[ 'bSortable_'.intval($_GET['iSortCol_'.$i]) ] == "true" )
+				{
+					$sOrder .= $aColumns[ intval( $_GET['iSortCol_'.$i] ) ]."
+						".$this->escapeString($_GET['sSortDir_'.$i] ) .", ";
+				}
+			}
+		  
+			$sOrder = substr_replace( $sOrder, "", -2 );
+			if ( $sOrder == "ORDER BY" )
+			{
+				$sOrder = "";
+			}
+		}
+		// echo "c=".$sOrder;exit;
+		//$sWhere = "id_nasabah = ".$_GET['idn']."";
+		//$sWhere = "id_nasabah = '122090'";
+		$sWhere = "";
+		if ( isset($_GET['sSearch']) && $_GET['sSearch'] != "" )
+		{
+			$sWhere = "WHERE (";
+			for ( $i=0 ; $i<count($aColumns) ; $i++ )
+			{
+				if ( isset($_GET['bSearchable_'.$i]) && $_GET['bSearchable_'.$i] == "true" )
+				{
+					$sWhere .= "`".$aColumns[$i]."` LIKE '%".$this->db->escape_like_str( $_GET['sSearch'] )."%' OR ";
+				}
+			}
+			$sWhere = substr_replace( $sWhere, "", -3 );
+			$sWhere .= ')';
+		}
+		
+		/* Individual column filtering */
+		for ( $i=0 ; $i<count($aColumns) ; $i++ )
+		{
+			if ( isset($_GET['bSearchable_'.$i]) && $_GET['bSearchable_'.$i] == "true" && $_GET['sSearch_'.$i] != '' )
+			{
+				if ( $sWhere == "" )
+				{
+					$sWhere = "WHERE ";
+				}
+				else
+				{
+					$sWhere .= " AND ";
+				}
+				$sWhere .= "`".$aColumns[$i]."` LIKE '%".$this->db->escape_like_str($_GET['sSearch_'.$i])."%' ";
+			}
+		}
+		
+		// customize, added $joinQuery var name //`$joinCols`,
+		$sQuery = "
+			SELECT SQL_CALC_FOUND_ROWS  `".str_replace(" , ", " ", implode("`, `", $aColumns))."`
+			FROM   $sTable
+			$joinQuery
+			$sWhere
+			$sOrder
+			$sLimit
+			";
+	   
+			
+		$rResult = $this->db->query($sQuery);
+		$result = $rResult->result();//`$joinCols`,
+		$sQueryC = "
+			SELECT SQL_CALC_FOUND_ROWS  `".str_replace(" , ", " ", implode("`, `", $aColumns))."`
+			FROM   $sTable
+			$joinQuery
+			$sWhere
+			";
+			
+		
+		
+		
+		$rResultC = $this->db->query($sQueryC);
+		
+		$iFilteredTotal = 0;
+		if( $rResultC->num_rows() > 0) {
+			$iFilteredTotal = $rResultC->num_rows();
+		}
+		
+		$sQuery3 = "
+			SELECT COUNT(`".$sIndexColumn."`)
+			FROM   $sTable
+		";
+		
+		$rResultTotal = $this->db->query($sQuery3);
+		
+		$iTotal = 0;
+		if( $rResultTotal->num_rows() > 0) {
+			$iTotal = $rResultTotal->num_rows();
+		}
+		
+		if( !$this->input->get('sEcho') ) {
+			exit();
+		}
+		
+		// CSRF
+		$CI =& get_instance();
+		if($CI->config->item('csrf_protection') === TRUE)
+		{
+			$csrf_post = $this->input->get($CI->config->item('csrf_token_name'));
+			$csrf_cookie = $_COOKIE[$CI->config->item('csrf_cookie_name')];
+			if( !$csrf_post || $csrf_post!=$csrf_cookie ) {
+				return false;
+			}
+		}
+		
+		$output = array(
+			"sEcho" => intval($_GET['sEcho']),
+			"iTotalRecords" => $iTotal,
+			"iTotalDisplayRecords" => $iFilteredTotal,
+			"aaData" => array()
+		);
+		
+		$no = $_GET['iDisplayStart'] + 1;
+		foreach( $result as $aRow )
+		{
+			
+			
+			$row = array();
+			$button = '';
+			
+			$editUrl = site_url('doc/dk/'.$aRow->idn );
+			$deleteUrl = site_url('doc/d/'.$aRow->idn );
+			$folder = site_url('doc/folder/'.$aRow->idn );
+			
+			$button .= '<a href="'.$editUrl.'" class="btn btn-mini"><i class="icon-pencil"></i> </a> ';
+			$button .= '<a href="'.$deleteUrl.'" class="btn btn-mini btn-danger" id="deleteBtn" onClick="return confirm(\'You are sure to delete the data?\')"><i class="icon-trash icon-white"></i> </a>';
+			$button .= '<a href="'.$folder.'" class="btn btn-mini default" id="file-input">Folder </a>';
+			
+			// $row[] = $button;
+			$row[] = $no;//$aRow->idn;
+			$row[] = $aRow->no;
+			$row[] = $aRow->klien;
+			//$row[] = $aRow->lemari;
+			//$row[] = $aRow->laci;
+			//$row[] = $aRow->cyear;
+			$row[] = $aRow->cdt;
+			$row[] = $aRow->cby;
+			$row[] = $aRow->cby;
+			$row[] = $aRow->cby;
+			//$row[] = ($aRow->userFlag)?'Aktif':'Non-Aktif';
+			//$row[] = $aRow->group_title;
+			$row[] = $button;
+			$output['aaData'][] = $row;
+			
+			$no++;
+		}
+		
+		/*
+		
+		<td>
+					<a href="<?php echo site_url('doc/dk/'.$row->idn);?>" class="btn btn-mini" title="Edit"><i class="icon-pencil"></i></a>
+                    <?php if ($this->model_session->auth_display('document', 3)): ?>
+					<a href="<?php echo site_url('doc/p/'.$row->idn);?>" class="btn btn-mini btn-warning" title="Print Barcode" target="_blank"><i class="icon-barcode icon-white"></i></a>
+					<a href="<?php echo site_url('doc/d/'.$row->idn);?>" class="btn btn-mini btn-danger" title="Hapus" id="deleteBtn" onClick="return confirm(\'Anda yakin akan menghapus data?\')"><i class="icon-trash icon-white"></i></a>
+                    <?php endif; ?>			
+				</td>
+				<td><?php echo $row->no;?></td>
+				<td><?php echo $row->klien;?></td>
+				<td><?php echo $row->ctr;?></td>
+				<td><?php echo $row->box;?></td>
+				<td><?php echo $row->lemari;?></td>
+				<td><?php echo $row->laci;?></td>
+				<td><?php echo $row->cyear;?></td>
+				<td><?php echo $row->cdt;?></td>
+				<td><?php echo $row->cby;?></td>
+				<td><a href="<?php echo site_url('doc/folder/'.$row->idn) ?>" class="btn btn-mini default">Folder</a></td>
+		
+		*/
+		
+		echo json_encode( $output );
+		
+	}
+	
+	public function get_datatable_json_file()
+	{		
+		$aColumns = $this->datatable_json_file;
+		
+		$sIndexColumn = "id_dokumen_file";	
+		$sTable = 'dokumen_file';
+		$joinCols = null;//'group_title';
+		$joinQuery = '';//"LEFT JOIN ".DBGRP." ON ".DBGRP.".group_id = ".$sTable.".group_id";
+	
+		$sLimit = "";
+		if ( isset( $_GET['iDisplayStart'] ) && $_GET['iDisplayLength'] != '-1' )
+		{
+			$sLimit = "LIMIT ".(int)( $_GET['iDisplayStart'] ).", ".
+				(int)( $_GET['iDisplayLength'] );
+		}
+		
+		// ordering
+		$sOrder = "";
+		if ( isset( $_GET['iSortCol_0'] ) )
+		{
+			$sOrder = "ORDER BY  ";
+			for ( $i=0 ; $i<intval( $_GET['iSortingCols'] ) ; $i++ )
+			{
+				if ( $_GET[ 'bSortable_'.intval($_GET['iSortCol_'.$i]) ] == "true" )
+				{
+					$sOrder .= $aColumns[ intval( $_GET['iSortCol_'.$i] ) ]."
+						".$this->escapeString($_GET['sSortDir_'.$i] ) .", ";
+				}
+			}
+		  
+			$sOrder = substr_replace( $sOrder, "", -2 );
+			if ( $sOrder == "ORDER BY" )
+			{
+				$sOrder = "";
+			}
+		}
+		// echo "c=".$sOrder;exit;
+		$sWhere = "";
+		if ( isset($_GET['sSearch']) && $_GET['sSearch'] != "" )
+		{
+			$sWhere = "WHERE (";
+			for ( $i=0 ; $i<count($aColumns) ; $i++ )
+			{
+				if ( isset($_GET['bSearchable_'.$i]) && $_GET['bSearchable_'.$i] == "true" )
+				{
+					$sWhere .= "`".$aColumns[$i]."` LIKE '%".$this->db->escape_like_str( $_GET['sSearch'] )."%' OR ";
+				}
+			}
+			$sWhere = substr_replace( $sWhere, "", -3 );
+			$sWhere .= ')';
+		}
+		
+		/* Individual column filtering */
+		for ( $i=0 ; $i<count($aColumns) ; $i++ )
+		{
+			if ( isset($_GET['bSearchable_'.$i]) && $_GET['bSearchable_'.$i] == "true" && $_GET['sSearch_'.$i] != '' )
+			{
+				if ( $sWhere == "" )
+				{
+					$sWhere = "WHERE ";
+				}
+				else
+				{
+					$sWhere .= " AND ";
+				}
+				$sWhere .= "`".$aColumns[$i]."` LIKE '%".$this->db->escape_like_str($_GET['sSearch_'.$i])."%' ";
+			}
+		}
+		$sWhere .= "where id_folder = ".$_GET['idfolder']."";
+		// customize, added $joinQuery var name //`$joinCols`,
+		$sQuery = "
+			SELECT SQL_CALC_FOUND_ROWS  `".str_replace(" , ", " ", implode("`, `", $aColumns))."`
+			FROM   $sTable
+			$joinQuery
+			$sWhere
+			$sOrder
+			$sLimit
+			";
+		 		
+		$rResult = $this->db->query($sQuery);
+		$result = $rResult->result();//`$joinCols`,
+		$sQueryC = "
+			SELECT SQL_CALC_FOUND_ROWS  `".str_replace(" , ", " ", implode("`, `", $aColumns))."`
+			FROM   $sTable
+			$joinQuery
+			$sWhere
+			";
+			
+		
+		
+		
+		$rResultC = $this->db->query($sQueryC);
+		
+		$iFilteredTotal = 0;
+		if( $rResultC->num_rows() > 0) {
+			$iFilteredTotal = $rResultC->num_rows();
+		}
+		
+		$sQuery3 = "
+			SELECT COUNT(`".$sIndexColumn."`)
+			FROM   $sTable
+		";
+		
+		$rResultTotal = $this->db->query($sQuery3);
+		
+		$iTotal = 0;
+		if( $rResultTotal->num_rows() > 0) {
+			$iTotal = $rResultTotal->num_rows();
+		}
+		
+		if( !$this->input->get('sEcho') ) {
+			exit();
+		}
+		
+		// CSRF
+		$CI =& get_instance();
+		if($CI->config->item('csrf_protection') === TRUE)
+		{
+			$csrf_post = $this->input->get($CI->config->item('csrf_token_name'));
+			$csrf_cookie = $_COOKIE[$CI->config->item('csrf_cookie_name')];
+			if( !$csrf_post || $csrf_post!=$csrf_cookie ) {
+				return false;
+			}
+		}
+		
+		$output = array(
+			"sEcho" => intval($_GET['sEcho']),
+			"iTotalRecords" => $iTotal,
+			"iTotalDisplayRecords" => $iFilteredTotal,
+			"aaData" => array()
+		);
+		
+		
+		//print_r($result);
+		
+		foreach( $result as $aRow )
+		{
+			
+			
+			$row = array();
+			$button = '';
+			
+			$button .= '<a class="btn btn-mini" id="open-edit" data="'.$aRow->id_dokumen_file.'"><i class="icon-pencil"></i> </a> ';
+			$button .= '<a href="#" class="btn btn-mini btn-danger" id="deleteBtn" data="'.$aRow->id_dokumen_file.'" ><i class="icon-trash icon-white"></i> </a>';
+			$button .= '<a href="#" class="btn btn-mini default" id="btn-view-dok" data="'.$aRow->id_dokumen_file.'">View File </a>'.$this->modalViewPdf($aRow->id_dokumen_file,$aRow->nama_dokumen,$aRow->nama_file).'';
+			
+			// $row[] = $button;
+			$row[] = $aRow->id_dokumen_file;
+			$row[] = $aRow->nama_dokumen;
+			
+			$row[] = $button;
+			$output['aaData'][] = $row;
+		}
+		
+		echo json_encode( $output );
+		
+	}
+	
+	public function modalViewPdf($id,$file,$dokumen)
+	{
+		 $ss = '<div id="myModal'.$id.'" class="modal fade myModal" role="dialog">
+					 <div class="modal-dialog modal-lg">
+						 <div class="modal-content">
+							 <div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal">&times;</button>
+								 <h4 class="modal-title">'.$file.'</h4>
+							 </div>
+							 <div class="modal-body">
+								 <embed  src="'.base_url().'/uploads/'.$dokumen.'.pdf" frameborder="0" width="100%" height="400px"/>
+								 <div class="modal-footer">
+									 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+								 </div>
+							 </div>
+						 </div>
+					</div>
+				 </div>';
+		return $ss;
+	}
 		
 } 
 /* End of file Model_doc.php */

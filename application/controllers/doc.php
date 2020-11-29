@@ -221,6 +221,14 @@ class Doc extends CI_Controller {
 		}
 	}
 	
+	public function json_data_doc()
+	{
+		$this->model_session->auth_page('document', 2);
+		$this->model_doc->get_datatable_json_doc();		
+	}
+	
+	
+	
 	public function json_data_filter()
 	{
 		$this->model_session->auth_page('document', 1);
@@ -240,11 +248,293 @@ class Doc extends CI_Controller {
 		$this->load->view('body', $data);
 	}
 	
+	
+	
+	public function foldersave()
+	{
+		$data = json_decode(json_encode($_POST));
+		$data = json_decode(json_encode($data), true);
+		
+		$nama_folder = $data['nama_folder'];
+		$box 	     = $data['box'];
+		$blok        = $data['blok'];
+		$rak         = $data['rak'];
+		$idn         = $data['idn'];
+		$idfolder         = $data['idfolder'];
+		
+		
+		
+	   $folder = array(
+			 'id_nasabah' =>$idn,
+			 'nama_folder' =>$nama_folder,
+			 'blok' =>$blok,
+			 'box' =>$box,
+			 'rak' =>$rak,
+		);
+		
+		
+		if(!empty($idfolder))
+		{
+			    $this->db->where('id_folder',$idfolder);
+			    $dd = $this->db->update('folder',$folder);
+			    if($dd)
+				{
+					$data = array(
+							"success" => 'OK',
+							//"msg"     => 'Data telah diubah, <a href="'.site_url('doc/dk/'.$dd.'').'">Untuk detailnya klik disini</a>'
+							//"msg"     => 'Data telah diubah'
+							"msg"     => 'Data telah diubah, <a href="#" id="open-edit" data="'.$idfolder.'">Untuk detailnya klik disini</a>'
+
+						);
+					echo json_encode($data);
+				}
+				else
+				{
+					$data = array(
+							"success" => 'NO',
+							"msg"     => 'Data Gagal diubah, Silahkan coba lagi'
+						);
+					echo json_encode($data);
+				}	
+		}
+        else
+        {
+				$this->db->insert('folder',$folder);
+				$insertID = $this->db->insert_id();
+				if($insertID)
+				{
+					$data = array(
+							"success" => 'OK',
+							//"msg"     => 'Data baru telah terentry, <a href="'.site_url('doc/dk/'.$insertID.'').'">Untuk detailnya klik disini</a>'
+							"msg"     => 'Data baru telah terentry, <a href="#" id="open-edit" data="'.$insertID.'">Untuk detailnya klik disini</a>'
+							//"msg"     => 'Data baru telah terentry'
+						);
+					echo json_encode($data);
+				}
+				else
+				{
+					$data = array(
+							"success" => 'NO',
+							"msg"     => 'Data Gagal entry, Silahkan coba lagi'
+						);
+					echo json_encode($data);
+				}	
+			
+		}			
+		
+				
+	}
+	
+	public function folder()
+	{
+		$id = $this->uri->segment(4);
+		$iddk = $this->uri->segment(3);
+		$this->model_session->auth_page('document', 2);
+		$this->model_session->log_activity('V', current_url());
+		$data['layout'] = $this->folder.'folder';
+		$data['idn'] = $iddk;
+		//$data['jenis_berkas'] = $this->db->query("select * from jenis_berkas")->result_array();
+		$this->load->view('body', $data);
+	}
+	
+	public function json_data_folder()
+	{
+		$this->model_session->auth_page('document', 2);
+		$this->model_doc->get_datatable_json_folder();		
+	}
+	
+	public function json_data_file()
+	{
+		//$this->model_session->auth_page('document', 2);
+		$this->model_doc->get_datatable_json_file();		
+	}
+	
+	
+	public function file()
+	{
+		$id = $this->uri->segment(3);
+		$arsip = $this->uri->segment(4);
+		$folder = $this->uri->segment(5);
+		//$idfolder = $this->uri->segment(4);
+		//$this->model_session->auth_page('document', 2);
+		//$this->model_session->log_activity('V', current_url());
+		$data['layout'] = $this->folder.'file';
+		$data['idfolder'] = $id;
+		$data['arsip'] = $arsip;
+		$data['folder'] = $folder;
+		//$data['jenis_berkas'] = $this->db->query("select * from jenis_berkas")->result_array();
+		$this->load->view('body', $data);
+	}
+	public function insertArsip()
+	{
+		$data = json_decode(json_encode($_POST));
+		$data = json_decode(json_encode($data), true);
+		//print_r($data);
+	    // $data = json_decode($data, TRUE);
+		$jenis_berkas = $data['berkas']['jenis_berkas'];
+		$no_polis 	  = $data['berkas']['no_polis'];
+		$nama_dokumen = $data['berkas']['nama_dokumen'];
+		$tahun        = $data['berkas']['tahun'];
+		
+		$datax = array(
+			'ctr'=> $jenis_berkas,//$ctr, // jenis dokumen
+			'no'=> $no_polis, // No Polis
+			'klien'=>$nama_dokumen, // klien
+			'cyear'=>$tahun, // thn
+			'cdt'=>date('d-m-Y'),				// created_at
+			
+		);
+	
+		$this->db->insert('nasabah',$datax);	
+		$insertID = $this->db->insert_id();
+		
+		if($insertID)
+		{
+			$data = array(
+					"success" => 'OK',
+					"msg"     => 'Data baru telah terentry, <a href="'.site_url('doc/dk/'.$insertID.'').'">Untuk detailnya klik disini</a>'
+				);
+			echo json_encode($data);
+		}
+        else
+        {
+			$data = array(
+					"success" => 'NO',
+					"msg"     => 'Data Gagal entry, Silahkan coba lagi'
+				);
+			echo json_encode($data);
+		}			
+		 
+		
+		
+	}	
+	
+	public function insertFile()
+	{
+		$data = json_decode(json_encode($_POST));
+		$data = json_decode(json_encode($data), true);
+		//print_r($data);
+		$id_dokumen = $data['id_dokumen']; 
+		$id_folder  = $data['id_folder'];
+		$nama_file  = $data['nama_file'];
+		
+		if(!empty($id_dokumen))
+		{
+			
+			    $prev_file_path = "./uploads/".$nama_file.".pdf";
+				if(unlink($prev_file_path))
+				{
+					
+					 $_FILES['file']['name'] = $_FILES['files']['name'];
+					  $_FILES['file']['type'] = $_FILES['files']['type'];
+					  $_FILES['file']['tmp_name'] = $_FILES['files']['tmp_name'];
+					  $_FILES['file']['error'] = $_FILES['files']['error'];
+					  $_FILES['file']['size'] = $_FILES['files']['size'];	
+					  
+					  $config['upload_path'] = 'uploads/'; 
+					  $config['allowed_types'] = 'jpg|jpeg|png|gif|pdf|csv';
+					  $config['max_size'] = '5000';
+					  $config['file_name'] = $_FILES['files']['name'];
+					  $config['remove_spaces'] 	= TRUE;
+					  $config['encrypt_name']	= TRUE;
+					  $this->load->library('upload',$config); 
+					  if($this->upload->do_upload('file')){
+						$uploadData = $this->upload->data();
+						//$filename = $uploadData['file_name'];
+						$file = array(
+								'nama_dokumen' =>$_FILES['files']['name'],
+								'nama_file' =>$uploadData['raw_name'],
+								'id_folder' =>$id_folder, 
+						);
+							  $this->db->where('id_dokumen_file',$id_dokumen);
+					    $d =  $this->db->update('dokumen_file',$file);
+					   
+					    if($d)
+						{
+							$data = array(
+									"success" => 'OK',
+									//"msg"     => 'Data File baru telah terentry, <a href="#" id="open-edit" data="'.$insertID.'">Untuk detailnya klik disini</a>'
+									"msg"     => 'Data berhasil diubah'
+									
+								);
+							echo json_encode($data);
+						}
+						else
+						{
+							$data = array(
+									"success" => 'NO',
+									"msg"     => 'File gagal  diupdate, Silahkan coba lagi'
+								);
+							echo json_encode($data);
+						}	 
+					}
+					
+				}	
+				else
+				{
+					 $data = array(
+							"success" => 'NO',
+							"msg"     => 'Terjadi Kesalahan, gagal diupdate'
+						);
+					header('Content-Type: application/json');
+					echo json_encode( $data );	 
+				}
+					
+			
+		}
+        else
+        {
+				  $_FILES['file']['name'] = $_FILES['files']['name'];
+				  $_FILES['file']['type'] = $_FILES['files']['type'];
+				  $_FILES['file']['tmp_name'] = $_FILES['files']['tmp_name'];
+				  $_FILES['file']['error'] = $_FILES['files']['error'];
+				  $_FILES['file']['size'] = $_FILES['files']['size'];	
+				  
+				  $config['upload_path'] = 'uploads/'; 
+				  $config['allowed_types'] = 'jpg|jpeg|png|gif|pdf|csv';
+				  $config['max_size'] = '5000';
+				  $config['file_name'] = $_FILES['files']['name'];
+				  $config['remove_spaces'] 	= TRUE;
+				  $config['encrypt_name']	= TRUE;
+				  $this->load->library('upload',$config); 
+    			  if($this->upload->do_upload('file')){
+						$uploadData = $this->upload->data();
+						//$filename = $uploadData['file_name'];
+						$file = array(
+								'nama_dokumen' =>$_FILES['files']['name'],
+								'nama_file' =>$uploadData['raw_name'],
+								'id_folder' =>$id_folder, 
+						);
+					    $this->db->insert('dokumen_file',$file);
+					    $insertID = $this->db->insert_id();
+					    if($insertID)
+						{
+							$data = array(
+									"success" => 'OK',
+									//"msg"     => 'Data File baru telah terentry, <a href="#" id="open-edit" data="'.$insertID.'">Untuk detailnya klik disini</a>'
+									"msg"     => 'Data File baru telah terentry'
+									
+								);
+							echo json_encode($data);
+						}
+						else
+						{
+							$data = array(
+									"success" => 'NO',
+									"msg"     => 'Data Gagal entry, Silahkan coba lagi'
+								);
+							echo json_encode($data);
+						}	 
+				  }
+			
+			
+		}			
+		
+	}
+	
 	public function insertDokumen()
 	{
-		
 		//print_r($_FILES);
-		
 		$data = json_decode(json_encode($_POST));
 		$data = json_decode(json_encode($data), true)['data'];
 		$data = json_decode($data, TRUE);
@@ -362,7 +652,8 @@ class Doc extends CI_Controller {
 			
 			$data = array(
 				"success" => 'OK',
-				"msg"     => $ss
+				//"msg"     => $ss
+				"msg"     => 'Folder ini Berhasil dihapus'
 			);
 			
 			header('Content-Type: application/json');
@@ -370,9 +661,14 @@ class Doc extends CI_Controller {
 		}
         else
         {
+			
+			$this->db->where('id_folder ', $id);
+			$this->db->delete('folder');
+			
 			$data = array(
-							"success" => 'NO',
-							"msg"     => 'Terjadi Kesalahan'
+							"success" => 'OK',
+							//"msg"     => 'Terjadi Kesalahan'
+							"msg"     => 'Folder ini Berhasil dihapus'
 						);
 			header('Content-Type: application/json');
 			echo json_encode( $data );	 
@@ -487,6 +783,53 @@ class Doc extends CI_Controller {
 		}
 		
 	}	
+	
+	
+	public function updateArsip()
+	{
+		
+		$data = json_decode(json_encode($_POST));
+		$data = json_decode(json_encode($data), true);
+		//print_r($data);
+	    // $data = json_decode($data, TRUE);
+		
+		$idn = $data['berkas']['idn'];
+		$jenis_berkas = $data['berkas']['jenis_berkas'];
+		$no_polis 	  = $data['berkas']['no_polis'];
+		$nama_dokumen = $data['berkas']['nama_dokumen'];
+		$tahun        = $data['berkas']['tahun'];
+		
+		$datax = array(
+			'ctr'=> $jenis_berkas,//$ctr, // jenis dokumen
+			'no'=> $no_polis, // No Polis
+			'klien'=>$nama_dokumen, // klien
+			'cyear'=>$tahun, // thn
+			'cdt'=>date('d-m-Y'),				// created_at
+			
+		);
+		$this->db->where('idn', $idn);
+		$fg = $this->db->update('nasabah',$datax);	
+		
+		if($fg)
+		{
+			$data = array(
+					"success" => 'OK',
+					"msg"     => 'Data Sudah terupdate'
+				);
+			echo json_encode($data); 
+		}
+        else
+		{
+			$data = array(
+					"success" => 'NO',
+					"msg"     => 'Update Gagal'
+				);
+			echo json_encode($data); 
+		}			
+		
+		
+	}	
+	
 	
 	public function updateDokumen()
 	{
@@ -694,6 +1037,45 @@ class Doc extends CI_Controller {
 		$data['jenis_berkas'] = $this->db->query("select * from jenis_berkas")->result_array();
 		$data['layout'] = $this->folder.'e';
 		$this->load->view('body', $data);
+	}	
+	
+	
+	public function loadDataFile()
+	{
+		$id = $_POST['data'];
+		$data_file = $this->db->query("select * from dokumen_file where id_dokumen_file='$id'")->result_array();
+		
+		if(count($data_file)>0)
+		{
+			$data = array(
+					"success" => 'OK',
+					"msg"     => $data_file
+				);
+			//header('Content-Type: application/json');
+			echo json_encode( $data );
+		}
+		else
+        {
+			$data = array(
+					"success" => 'NO',
+					"msg"     => 'Data Tidak Ada'
+				);
+			//header('Content-Type: application/json');
+			echo json_encode( $data );
+		}			
+		
+	}
+	
+	public function loadDataFolder()
+	{
+		$id = $_POST['data'];
+		$data_folder = $this->db->query("select * from folder where id_folder='$id'")->result_array();
+		$data = array(
+					"success" => 'OK',
+					"msg"     => $data_folder
+				);
+		header('Content-Type: application/json');
+		echo json_encode( $data );
 	}	
 	
 	public function loadData()
